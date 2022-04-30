@@ -29,6 +29,7 @@ impl ImageWriter {
 
             for i in 0..3 {
                 let digit = b'0' + (c % 10);
+
                 v[2 - i] = digit;
                 c /= 10;
             }
