@@ -23,8 +23,7 @@ impl ImageWriter {
 
     pub fn write_pixel(&mut self, color: Color) {
         let channel_to_digits = |mut c: u8| -> (usize, [u8; 3]) {
-            let mut f = false;
-            let mut s = 0;
+            let s = 0;
             let mut v = [0, 0, 0];
 
             for i in 0..3 {
