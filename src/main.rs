@@ -1,6 +1,9 @@
 mod color;
+mod hit;
 mod image_writer;
 mod ray;
+mod scene;
+mod sphere;
 mod vector;
 
 use std::fs::File;
@@ -8,45 +11,51 @@ use std::io;
 use std::time::Instant;
 
 use color::{color, Color};
+use hit::Hit;
 use image_writer::ImageWriter;
 use ray::Ray;
-use vector::{vector3, Vector3};
+use scene::Scene;
+use sphere::Sphere;
+use vector::vector3;
 
-fn hit_sphere(ray: &Ray, center: &Vector3, radius: f64) -> bool {
-    let distance = ray.origin - *center;
-    let a = ray.direction.dot(&ray.direction);
-    let b = ray.direction.dot(&distance) * 2.0;
-    let c = distance.dot(&distance) - radius * radius;
-    let discriminant = b * b - 4.0 * a * c;
-
-    discriminant > 0.0
-}
-
-fn ray_color(ray: &Ray) -> Color {
-    if hit_sphere(ray, &vector3(0.0, 0.0, -1.0), 0.5) {
-        return color(1.0, 0.0, 0.0);
+fn ray_color(ray: &Ray, scene: &Scene) -> Color {
+    if let Some(hit_data) = scene.hit(ray, 0.0, f64::INFINITY) {
+        let normal_color: Color = hit_data.normal.into();
+        (normal_color + color(1.0, 1.0, 1.0)) / 2.0
+    } else {
+        let normalized = ray.direction.normalize();
+        let t = (normalized.y + 1.0) / 2.0;
+        color(1.0, 1.0, 1.0) * (1.0 - t) + color(0.5, 0.7, 1.0) * t
     }
-
-    let normalized = ray.direction.normalize();
-    let t = 0.5 * (normalized.y + 1.0);
-
-    color(1.0, 1.0, 1.0) * (1.0 - t) + color(0.5, 0.7, 1.0) * t
 }
 
 fn main() -> io::Result<()> {
     let aspect_ratio = 16.0 / 9.0;
-    let image_width = 1000;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as usize;
+
+    let scene = Scene {
+        objects: vec![
+            Box::new(Sphere {
+                center: vector3(0.0, 0.0, -1.0),
+                radius: 0.5,
+            }),
+            Box::new(Sphere {
+                center: vector3(3.0, 0.0, -3.0),
+                radius: 0.5,
+            }),
+            Box::new(Sphere {
+                center: vector3(0.0, -100.5, -1.0),
+                radius: 100.0,
+            }),
+        ],
+    };
 
     let viewport_height = 2.0;
     let viewport_width = viewport_height * aspect_ratio;
     let focal_length = 1.0;
 
-    let origin = Vector3 {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0,
-    };
+    let origin = vector3(0.0, 0.0, 0.0);
     let horizontal = vector3(viewport_width, 0.0, 0.0);
     let vertical = vector3(0.0, viewport_height, 0.0);
     let bottom_left = origin - horizontal / 2.0 - vertical / 2.0 - vector3(0.0, 0.0, focal_length);
@@ -62,7 +71,7 @@ fn main() -> io::Result<()> {
                 origin,
                 direction: bottom_left + horizontal * u + vertical * v - origin,
             };
-            writer.write_pixel(ray_color(&ray));
+            writer.write_pixel(ray_color(&ray, &scene));
         }
     }
 

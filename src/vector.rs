@@ -1,3 +1,4 @@
+use crate::color::{color, Color};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone)]
@@ -12,12 +13,16 @@ pub fn vector3(x: f64, y: f64, z: f64) -> Vector3 {
 }
 
 impl Vector3 {
-    pub fn length(&self) -> f64 {
-        f64::sqrt(self.dot(self))
-    }
-
     pub fn dot(&self, other: &Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
+    }
+
+    pub fn length_squared(&self) -> f64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
+    pub fn length(&self) -> f64 {
+        self.length_squared().sqrt()
     }
 
     pub fn cross(&self, other: &Self) -> Self {
@@ -42,6 +47,12 @@ impl Neg for Vector3 {
             y: -self.y,
             z: -self.z,
         }
+    }
+}
+
+impl Into<Color> for Vector3 {
+    fn into(self) -> Color {
+        color(self.x, self.y, self.z)
     }
 }
 
