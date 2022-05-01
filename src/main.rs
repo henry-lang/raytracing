@@ -1,3 +1,4 @@
+mod camera;
 mod color;
 mod hit;
 mod image_writer;
@@ -10,6 +11,7 @@ use std::fs::File;
 use std::io;
 use std::time::Instant;
 
+use camera::{Camera, CameraConfig};
 use color::{color, Color};
 use hit::Hit;
 use image_writer::ImageWriter;
@@ -30,10 +32,6 @@ fn ray_color(ray: &Ray, scene: &Scene) -> Color {
 }
 
 fn main() -> io::Result<()> {
-    let aspect_ratio = 16.0 / 9.0;
-    let image_width = 400;
-    let image_height = (image_width as f64 / aspect_ratio) as usize;
-
     let scene = Scene {
         objects: vec![
             Box::new(Sphere {
@@ -51,14 +49,21 @@ fn main() -> io::Result<()> {
         ],
     };
 
+    let aspect_ratio = 16.0 / 9.0;
+
+    let image_width = 400;
+    let image_height = (image_width as f64 / aspect_ratio) as usize;
+
     let viewport_height = 2.0;
     let viewport_width = viewport_height * aspect_ratio;
     let focal_length = 1.0;
 
-    let origin = vector3(0.0, 0.0, 0.0);
-    let horizontal = vector3(viewport_width, 0.0, 0.0);
-    let vertical = vector3(0.0, viewport_height, 0.0);
-    let bottom_left = origin - horizontal / 2.0 - vertical / 2.0 - vector3(0.0, 0.0, focal_length);
+    let camera = Camera::new(CameraConfig {
+        position: vector3(0.0, 0.0, 0.0),
+        viewport_width,
+        viewport_height,
+        focal_length,
+    });
 
     let start = Instant::now();
     let mut writer = ImageWriter::new(File::create("image.ppm")?, image_width, image_height);
@@ -67,11 +72,7 @@ fn main() -> io::Result<()> {
             let u = (i as f64) / (image_width - 1) as f64;
             let v = (j as f64) / (image_height - 1) as f64;
 
-            let ray = Ray {
-                origin,
-                direction: bottom_left + horizontal * u + vertical * v - origin,
-            };
-            writer.write_pixel(ray_color(&ray, &scene));
+            writer.write_pixel(ray_color(&camera.get_ray(u, v), &scene));
         }
     }
 
