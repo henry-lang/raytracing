@@ -7,6 +7,10 @@ pub struct Vector3 {
     pub z: f64,
 }
 
+pub fn vector3(x: f64, y: f64, z: f64) -> Vector3 {
+    Vector3 { x, y, z }
+}
+
 impl Vector3 {
     pub fn length(&self) -> f64 {
         f64::sqrt(self.dot(self))
@@ -23,6 +27,10 @@ impl Vector3 {
             z: self.x * other.y - self.y * other.x,
         }
     }
+
+    pub fn normalize(&self) -> Self {
+        *self / self.length()
+    }
 }
 
 impl Neg for Vector3 {
@@ -37,35 +45,8 @@ impl Neg for Vector3 {
     }
 }
 
-impl Mul<f64> for Vector3 {
-    type Output = Self;
-    fn mul(self, other: f64) -> Self::Output {
-        Self {
-            x: self.x * other,
-            y: self.y * other,
-            z: self.z * other,
-        }
-    }
-}
-
-impl MulAssign<f64> for Vector3 {
-    fn mul_assign(&mut self, other: f64) {
-        self.x *= other;
-        self.y *= other;
-        self.z *= other;
-    }
-}
-
-impl DivAssign<f64> for Vector3 {
-    fn div_assign(&mut self, other: f64) {
-        self.x /= other;
-        self.y /= other;
-        self.z /= other;
-    }
-}
-
 macro_rules! operator_impl {
-    ($(($t:ty, $fn:ident, $op:tt, $at:ty, $afn:ident, $aop:tt)),*) => {$(
+    ($(($t:ty, $tf:ty, $fn:ident, $op:tt, $at:ty, $atf:ty, $afn:ident, $aop:tt)),*) => {$(
         impl $t for Vector3 {
             type Output = Self;
 
@@ -78,6 +59,18 @@ macro_rules! operator_impl {
             }
         }
 
+        impl $tf for Vector3 {
+            type Output = Self;
+
+            fn $fn(self, other: f64) -> Self::Output {
+                Self {
+                    x: self.x $op other,
+                    y: self.y $op other,
+                    z: self.z $op other,
+                }
+            }
+        }
+
         impl $at for Vector3 {
             fn $afn(&mut self, other: Self) {
                 self.x $aop other.x;
@@ -85,12 +78,20 @@ macro_rules! operator_impl {
                 self.z $aop other.z;
             }
         }
+
+        impl $atf for Vector3 {
+            fn $afn(&mut self, other: f64) {
+                self.x $aop other;
+                self.y $aop other;
+                self.z $aop other;
+            }
+        }
     )*};
 }
 
 operator_impl!(
-    (Add, add, +, AddAssign, add_assign, +=),
-    (Sub, sub, -, SubAssign, sub_assign, -=),
-    (Mul, mul, *, MulAssign, mul_assign, *=),
-    (Div, div, /, DivAssign, div_assign, /=)
+    (Add, Add<f64>, add, +, AddAssign, AddAssign<f64>, add_assign, +=),
+    (Sub, Sub<f64>, sub, -, SubAssign, SubAssign<f64>, sub_assign, -=),
+    (Mul, Mul<f64>, mul, *, MulAssign, MulAssign<f64>, mul_assign, *=),
+    (Div, Div<f64>, div, /, DivAssign, DivAssign<f64>, div_assign, /=)
 );
