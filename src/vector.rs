@@ -13,6 +13,26 @@ pub fn vector3(x: f64, y: f64, z: f64) -> Vector3 {
 }
 
 impl Vector3 {
+    pub fn random() -> Self {
+        vector3(
+            rand::random::<f64>() * 2.0 - 1.0,
+            rand::random::<f64>() * 2.0 - 1.0,
+            rand::random::<f64>() * 2.0 - 1.0,
+        )
+    }
+
+    pub fn random_in_unit_sphere() -> Self {
+        loop {
+            let random = Self::random();
+
+            if random.length_squared() >= 1.0 {
+                continue;
+            }
+
+            return random;
+        }
+    }
+
     pub fn dot(&self, other: &Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }

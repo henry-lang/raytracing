@@ -3,9 +3,7 @@ use std::io::{BufWriter, Write};
 
 use crate::color::Color;
 
-/*
-    Simple writer for the ppm image file format. I know it's terrible, but it's dead simple.
-*/
+// Simple writer for the ppm image file format. I know it's terrible, but it's dead simple.
 
 pub struct ImageWriter {
     buffer: BufWriter<File>,
@@ -21,7 +19,13 @@ impl ImageWriter {
         Self { buffer }
     }
 
-    pub fn write_pixel(&mut self, color: Color) {
+    pub fn write_pixel(&mut self, mut color: Color, samples: usize) {
+        let scale = 1.0 / samples as f64;
+
+        color.r = (color.r * scale).sqrt();
+        color.g = (color.g * scale).sqrt();
+        color.b = (color.b * scale).sqrt();
+
         let channel_to_digits = |mut c: u8| -> (usize, [u8; 3]) {
             let s = 0;
             let mut v = [0, 0, 0];
