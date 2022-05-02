@@ -1,4 +1,5 @@
 use crate::color::{color, Color};
+use rand::Rng;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone)]
@@ -13,17 +14,17 @@ pub fn vector3(x: f64, y: f64, z: f64) -> Vector3 {
 }
 
 impl Vector3 {
-    pub fn random() -> Self {
+    pub fn random(rand: &mut impl Rng) -> Self {
         vector3(
-            rand::random::<f64>() * 2.0 - 1.0,
-            rand::random::<f64>() * 2.0 - 1.0,
-            rand::random::<f64>() * 2.0 - 1.0,
+            rand.gen_range(-1.0..1.0),
+            rand.gen_range(-1.0..1.0),
+            rand.gen_range(-1.0..1.0),
         )
     }
 
-    pub fn random_in_unit_sphere() -> Self {
+    pub fn random_in_unit_sphere(rand: &mut impl Rng) -> Self {
         loop {
-            let random = Self::random();
+            let random = Self::random(rand);
 
             if random.length_squared() >= 1.0 {
                 continue;
