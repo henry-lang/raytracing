@@ -34,6 +34,10 @@ impl Vector3 {
         }
     }
 
+    pub fn random_normalized(rand: &mut impl Rng) -> Self {
+        Self::random_in_unit_sphere(rand)
+    }
+
     pub fn dot(&self, other: &Self) -> f64 {
         self.x * other.x + self.y * other.y + self.z * other.z
     }

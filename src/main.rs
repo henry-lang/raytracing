@@ -11,7 +11,7 @@ use std::fs::File;
 use std::io;
 use std::time::Instant;
 
-use rand::{Rng, RngCore};
+use rand::Rng;
 
 use camera::{Camera, CameraConfig};
 use color::{color, Color};
@@ -22,13 +22,13 @@ use scene::Scene;
 use sphere::Sphere;
 use vector::{vector3, Vector3};
 
-fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl RngCore) -> Color {
+fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Color {
     if depth <= 0 {
         return color(0.0, 0.0, 0.0);
     }
 
     if let Some(hit_data) = scene.hit(ray, 0.001, f64::INFINITY) {
-        let target = hit_data.normal + Vector3::random_in_unit_sphere(rand);
+        let target = hit_data.normal + Vector3::random_normalized(rand);
         ray_color(
             &Ray {
                 origin: hit_data.point,
@@ -46,26 +46,24 @@ fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl RngCore) ->
 }
 
 fn main() -> io::Result<()> {
-    let scene = Scene {
-        objects: vec![
-            Box::new(Sphere {
-                center: vector3(0.0, 0.0, -1.0),
-                radius: 0.5,
-            }),
-            Box::new(Sphere {
-                center: vector3(0.0, -100.5, -1.0),
-                radius: 100.0,
-            }),
-        ],
-    };
+    let mut scene = Scene { objects: vec![] };
+
+    for i in 0..10 {
+        for j in 0..10 {
+            scene.objects.push(Box::new(Sphere {
+                center: vector3(i as f64 * 0.1 - 0.5, j as f64 * 0.1 - 0.5, -0.5),
+                radius: 0.05,
+            }));
+        }
+    }
 
     let mut rand = rand::thread_rng();
 
-    let aspect_ratio = 1.0;
+    let aspect_ratio = 16.0 / 9.0;
     let samples = 100;
-    let max_depth = 100;
+    let max_depth = 400;
 
-    let image_width = 400;
+    let image_width = 1920;
     let image_height = (image_width as f64 / aspect_ratio) as usize;
 
     let viewport_height = 2.0;
@@ -81,6 +79,7 @@ fn main() -> io::Result<()> {
 
     let start = Instant::now();
     let mut writer = ImageWriter::new(File::create("image.ppm")?, image_width, image_height);
+
     for j in (0..image_height).rev() {
         for i in 0..image_width {
             writer.write_pixel(
@@ -95,12 +94,13 @@ fn main() -> io::Result<()> {
                 samples,
             );
         }
+        println!("{}/{} scanlines completed.", image_height - j, image_height);
     }
 
     writer.flush();
 
     let elapsed = start.elapsed();
-    println!("{}ms", elapsed.as_millis());
+    println!("Done in {}ms", elapsed.as_millis());
 
     Ok(())
 }

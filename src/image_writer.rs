@@ -19,7 +19,7 @@ impl ImageWriter {
         Self { buffer }
     }
 
-    pub fn write_pixel(&mut self, mut color: Color, samples: usize) {
+    pub fn write_pixel(&mut self, color: Color, samples: usize) {
         let scale = 1.0 / samples as f64;
 
         let r = (color.r * scale).sqrt();
@@ -40,11 +40,11 @@ impl ImageWriter {
             (s, v)
         };
 
-        let (s, v) = channel_to_digits((r * 256.) as u8);
+        let (s, v) = channel_to_digits((r * 256.0) as u8);
         let r = &v[s..];
-        let (s, v) = channel_to_digits((g * 256.) as u8);
+        let (s, v) = channel_to_digits((g * 256.0) as u8);
         let g = &v[s..];
-        let (s, v) = channel_to_digits((b * 256.) as u8);
+        let (s, v) = channel_to_digits((b * 256.0) as u8);
         let b = &v[s..];
 
         self.buffer.write(r).expect("write pixel");
