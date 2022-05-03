@@ -19,12 +19,12 @@ impl ImageWriter {
         Self { buffer }
     }
 
-    pub fn write_pixel(&mut self, color: Color, samples: usize) {
-        let scale = 1.0 / samples as f64;
+    pub fn write_pixel(&mut self, mut color: Color, samples: usize) {
+        color *= 1.0 / samples as f64;
 
-        let r = (color.r * scale).sqrt();
-        let g = (color.g * scale).sqrt();
-        let b = (color.b * scale).sqrt();
+        let r = color.r.sqrt();
+        let g = color.g.sqrt();
+        let b = color.b.sqrt();
 
         let channel_to_digits = |mut c: u8| -> (usize, [u8; 3]) {
             let s = 0;

@@ -1,11 +1,12 @@
-use crate::hit::Face;
-use crate::hit::{Hit, HitData};
+use crate::hit::{Face, Hit, HitData};
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector::Vector3;
 
 pub struct Sphere {
     pub center: Vector3,
     pub radius: f64,
+    pub material: Material,
 }
 
 impl Hit for Sphere {
@@ -42,6 +43,7 @@ impl Hit for Sphere {
             point,
             normal,
             face,
+            material: &self.material,
         })
     }
 }

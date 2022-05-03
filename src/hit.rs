@@ -1,3 +1,4 @@
+use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector::Vector3;
 
@@ -18,11 +19,12 @@ impl Face {
 }
 
 #[derive(Copy, Clone)]
-pub struct HitData {
+pub struct HitData<'a> {
     pub t: f64,
     pub normal: Vector3,
     pub point: Vector3,
     pub face: Face,
+    pub material: &'a Material,
 }
 
 pub trait Hit {

@@ -2,6 +2,7 @@ mod camera;
 mod color;
 mod hit;
 mod image_writer;
+mod material;
 mod ray;
 mod scene;
 mod sphere;
@@ -17,10 +18,11 @@ use camera::{Camera, CameraConfig};
 use color::{color, Color};
 use hit::Hit;
 use image_writer::ImageWriter;
+use material::{Material, ScatterResult};
 use ray::Ray;
 use scene::Scene;
 use sphere::Sphere;
-use vector::{vector3, Vector3};
+use vector::vector3;
 
 fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Color {
     if depth <= 0 {
@@ -28,16 +30,13 @@ fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Col
     }
 
     if let Some(hit_data) = scene.hit(ray, 0.001, f64::INFINITY) {
-        let target = hit_data.normal + Vector3::random_normalized(rand);
-        ray_color(
-            &Ray {
-                origin: hit_data.point,
-                direction: target,
-            },
-            scene,
-            depth - 1,
-            rand,
-        ) * 0.5
+        match hit_data.material.scatter(ray, &hit_data, rand) {
+            ScatterResult::Absorbed => color(0.0, 0.0, 0.0),
+            ScatterResult::Scattered {
+                attenuation,
+                scattered,
+            } => attenuation * ray_color(&scattered, &scene, depth - 1, rand),
+        }
     } else {
         let normalized = ray.direction.normalize();
         let t = (normalized.y + 1.0) * 0.5;
@@ -46,24 +45,32 @@ fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Col
 }
 
 fn main() -> io::Result<()> {
-    let mut scene = Scene { objects: vec![] };
-
-    for i in 0..10 {
-        for j in 0..10 {
-            scene.objects.push(Box::new(Sphere {
-                center: vector3(i as f64 * 0.1 - 0.5, j as f64 * 0.1 - 0.5, -0.5),
-                radius: 0.05,
-            }));
-        }
-    }
+    let scene = Scene {
+        objects: vec![
+            Box::new(Sphere {
+                center: vector3(0.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Metal {
+                    albedo: color(0.25, 0.25, 0.25),
+                },
+            }),
+            Box::new(Sphere {
+                center: vector3(0.0, -100.5, -1.0),
+                radius: 100.0,
+                material: Material::Lambertian {
+                    albedo: color(1.0, 0.0, 0.0),
+                },
+            }),
+        ],
+    };
 
     let mut rand = rand::thread_rng();
 
     let aspect_ratio = 16.0 / 9.0;
     let samples = 100;
-    let max_depth = 400;
+    let max_depth = 50;
 
-    let image_width = 1920;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as usize;
 
     let viewport_height = 2.0;

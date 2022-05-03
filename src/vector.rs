@@ -34,8 +34,18 @@ impl Vector3 {
         }
     }
 
+    pub fn reflect(&self, normal: &Self) -> Self {
+        *self - *normal * self.dot(normal) * 2.0
+    }
+
     pub fn random_normalized(rand: &mut impl Rng) -> Self {
         Self::random_in_unit_sphere(rand)
+    }
+
+    pub fn near_zero(&self) -> bool {
+        let tolerance = 0.00000001;
+
+        self.x.abs() < tolerance && self.y.abs() < tolerance && self.z.abs() < tolerance
     }
 
     pub fn dot(&self, other: &Self) -> f64 {
