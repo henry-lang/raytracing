@@ -12,7 +12,8 @@ use std::fs::File;
 use std::io;
 use std::time::Instant;
 
-use rand::Rng;
+use rand::{Rng, SeedableRng};
+use rand_xorshift::XorShiftRng;
 
 use camera::{Camera, CameraConfig};
 use color::{color, Color};
@@ -61,26 +62,11 @@ fn main() -> io::Result<()> {
                     albedo: color(0.7, 0.3, 0.3),
                 },
             }),
-            Box::new(Sphere {
-                center: vector3(-1.0, 0.0, -1.0),
-                radius: 0.5,
-                material: Material::Metal {
-                    albedo: color(0.4, 0.4, 0.4),
-                    fuzz: 0.3,
-                },
-            }),
-            Box::new(Sphere {
-                center: vector3(1.0, 0.0, -1.0),
-                radius: 0.5,
-                material: Material::Metal {
-                    albedo: color(0.4, 0.4, 0.4),
-                    fuzz: 1.0,
-                },
-            }),
         ],
     };
 
-    let mut rand = rand::thread_rng();
+    let thread_rand = rand::thread_rng();
+    let mut rand = XorShiftRng::from_rng(thread_rand).unwrap();
 
     let aspect_ratio = 16.0 / 9.0;
     let samples = 100;
