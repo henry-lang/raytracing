@@ -7,7 +7,7 @@ use crate::vector::Vector3;
 
 pub enum Material {
     Lambertian { albedo: Color },
-    Metal { albedo: Color },
+    Metal { albedo: Color, fuzz: f64 },
 }
 
 pub enum ScatterResult {
@@ -34,8 +34,9 @@ impl Material {
                 }
             }
 
-            Material::Metal { albedo } => {
-                let direction = ray.direction.normalize().reflect(&hit_data.normal);
+            Material::Metal { albedo, fuzz } => {
+                let direction = ray.direction.normalize().reflect(&hit_data.normal)
+                    + Vector3::random_in_unit_sphere(rand) * *fuzz;
                 if direction.dot(&hit_data.normal) > 0.0 {
                     ScatterResult::Scattered {
                         attenuation: *albedo,

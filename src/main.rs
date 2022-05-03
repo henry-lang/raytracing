@@ -48,17 +48,33 @@ fn main() -> io::Result<()> {
     let scene = Scene {
         objects: vec![
             Box::new(Sphere {
-                center: vector3(0.0, 0.0, -1.0),
-                radius: 0.5,
-                material: Material::Metal {
-                    albedo: color(0.25, 0.25, 0.25),
-                },
-            }),
-            Box::new(Sphere {
                 center: vector3(0.0, -100.5, -1.0),
                 radius: 100.0,
                 material: Material::Lambertian {
-                    albedo: color(1.0, 0.0, 0.0),
+                    albedo: color(0.8, 0.8, 0.0),
+                },
+            }),
+            Box::new(Sphere {
+                center: vector3(0.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Lambertian {
+                    albedo: color(0.7, 0.3, 0.3),
+                },
+            }),
+            Box::new(Sphere {
+                center: vector3(-1.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Metal {
+                    albedo: color(0.4, 0.4, 0.4),
+                    fuzz: 0.3,
+                },
+            }),
+            Box::new(Sphere {
+                center: vector3(1.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Metal {
+                    albedo: color(0.4, 0.4, 0.4),
+                    fuzz: 1.0,
                 },
             }),
         ],
