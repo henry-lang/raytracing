@@ -1,13 +1,3 @@
-mod camera;
-mod color;
-mod hit;
-mod image_writer;
-mod material;
-mod ray;
-mod scene;
-mod sphere;
-mod vector;
-
 use std::fs::File;
 use std::io;
 use std::time::Instant;
@@ -15,15 +5,15 @@ use std::time::Instant;
 use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 
-use camera::{Camera, CameraConfig};
-use color::{color, Color};
-use hit::Hit;
-use image_writer::ImageWriter;
-use material::{Material, ScatterResult};
-use ray::Ray;
-use scene::Scene;
-use sphere::Sphere;
-use vector::vector3;
+use raytracer::camera::{Camera, CameraConfig};
+use raytracer::color::{color, Color};
+use raytracer::hit::Hit;
+use raytracer::image_writer::ImageWriter;
+use raytracer::material::{Material, ScatterResult};
+use raytracer::ray::Ray;
+use raytracer::scene::{Scene, Sky};
+use raytracer::sphere::Sphere;
+use raytracer::vector::vector3;
 
 fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Color {
     if depth <= 0 {
@@ -41,12 +31,16 @@ fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Col
     } else {
         let normalized = ray.direction.normalize();
         let t = (normalized.y + 1.0) * 0.5;
-        color(1.0, 1.0, 1.0) * (1.0 - t) + color(0.5, 0.7, 1.0) * t
+        scene.sky.get_color(t)
     }
 }
 
 fn main() -> io::Result<()> {
     let scene = Scene {
+        sky: Sky {
+            top: color(0.5, 0.7, 1.0),
+            bottom: color(1.0, 1.0, 1.0),
+        },
         objects: vec![
             Box::new(Sphere {
                 center: vector3(0.0, -100.5, -1.0),
@@ -59,7 +53,23 @@ fn main() -> io::Result<()> {
                 center: vector3(0.0, 0.0, -1.0),
                 radius: 0.5,
                 material: Material::Lambertian {
-                    albedo: color(0.7, 0.3, 0.3),
+                    albedo: color(1.0, 0.3, 0.3),
+                },
+            }),
+            Box::new(Sphere {
+                center: vector3(-1.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Metal {
+                    albedo: color(0.3, 0.3, 0.3),
+                    fuzz: 0.5,
+                },
+            }),
+            Box::new(Sphere {
+                center: vector3(1.0, 0.0, -1.0),
+                radius: 0.5,
+                material: Material::Metal {
+                    albedo: color(0.8, 0.0, 0.0),
+                    fuzz: 0.5,
                 },
             }),
         ],

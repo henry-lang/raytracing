@@ -1,0 +1,9 @@
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+raytracer = {path = "../raytracer"}
+rand = "0.8.5"
+rand_xorshift = "0.3.0"

@@ -1,8 +1,21 @@
+use crate::color::Color;
 use crate::hit::{Hit, HitData};
 use crate::ray::Ray;
 
+pub struct Sky {
+    pub top: Color,
+    pub bottom: Color,
+}
+
+impl Sky {
+    pub fn get_color(&self, t: f64) -> Color {
+        self.bottom * (1.0 - t) + self.top * t
+    }
+}
+
 pub struct Scene {
     pub objects: Vec<Box<dyn Hit>>,
+    pub sky: Sky,
 }
 
 impl Hit for Scene {

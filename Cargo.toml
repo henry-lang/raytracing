@@ -3,7 +3,12 @@ edition = "2021"
 name = "raytracing"
 version = "0.1.0"
 
-[dependencies]
-rand = "0.8.5"
-rand_xorshift = "0.3.0"
-threadpool = "1.8.1"
+[workspace]
+members = [
+    "raytracer",
+    "cli",
+]
+
+[[bin]]
+path = "cli/src/main.rs"
+name = "cli"
