@@ -1,14 +1,5 @@
-[package]
-edition = "2021"
-name = "raytracing"
-version = "0.1.0"
-
 [workspace]
 members = [
     "raytracer",
-    "cli",
+    "headless",
 ]
-
-[[bin]]
-path = "cli/src/main.rs"
-name = "cli"

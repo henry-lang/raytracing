@@ -5,15 +5,17 @@ use std::time::Instant;
 use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 
-use raytracer::camera::{Camera, CameraConfig};
-use raytracer::color::{color, Color};
-use raytracer::hit::Hit;
-use raytracer::image_writer::ImageWriter;
-use raytracer::material::{Material, ScatterResult};
-use raytracer::ray::Ray;
-use raytracer::scene::{Scene, Sky};
-use raytracer::sphere::Sphere;
-use raytracer::vector::vector3;
+use raytracer::{
+    camera::{Camera, CameraConfig},
+    color::{color, Color},
+    hit::Hit,
+    image_writer::ImageWriter,
+    material::{Material, ScatterResult},
+    ray::Ray,
+    scene::{Scene, Sky},
+    sphere::Sphere,
+    vector::vector3,
+};
 
 fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Color {
     if depth <= 0 {
