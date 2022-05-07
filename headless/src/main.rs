@@ -1,5 +1,9 @@
+mod buffer;
+
 use std::fs::File;
 use std::io;
+use std::sync::{atomic::Ordering, Arc};
+use std::thread;
 use std::time::Instant;
 
 use rand::{Rng, SeedableRng};
@@ -16,6 +20,8 @@ use raytracer::{
     sphere::Sphere,
     vector::vector3,
 };
+
+use buffer::AtomicPixel;
 
 fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Color {
     if depth <= 0 {
@@ -38,7 +44,7 @@ fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Col
 }
 
 fn main() -> io::Result<()> {
-    let scene = Scene {
+    let scene = Arc::new(Scene {
         sky: Sky {
             top: color(0.5, 0.7, 1.0),
             bottom: color(1.0, 1.0, 1.0),
@@ -75,50 +81,82 @@ fn main() -> io::Result<()> {
                 },
             }),
         ],
-    };
-
-    let thread_rand = rand::thread_rng();
-    let mut rand = XorShiftRng::from_rng(thread_rand).unwrap();
+    });
 
     let aspect_ratio = 16.0 / 9.0;
-    let samples = 100;
+    let thread_count = 16;
+    let samples_per_thread = 16;
     let max_depth = 50;
 
-    let image_width = 400;
+    let image_width = 1920;
     let image_height = (image_width as f64 / aspect_ratio) as usize;
+
+    let buffer = Arc::new(
+        (0..image_width * image_height)
+            .map(|_| AtomicPixel::new(0.0, 0.0, 0.0))
+            .collect::<Vec<_>>(),
+    );
+
+    // TODO: move to individual threads
 
     let viewport_height = 2.0;
     let viewport_width = viewport_height * aspect_ratio;
     let focal_length = 1.0;
 
-    let camera = Camera::new(CameraConfig {
+    let camera = Arc::new(Camera::new(CameraConfig {
         position: vector3(0.0, 0.0, 0.0),
         viewport_width,
         viewport_height,
         focal_length,
-    });
+    }));
 
     let start = Instant::now();
-    let mut writer = ImageWriter::new(File::create("image.ppm")?, image_width, image_height);
 
-    for j in (0..image_height).rev() {
-        for i in 0..image_width {
-            writer.write_pixel(
-                (0..samples)
-                    .map(|_| {
-                        let u = (i as f64 + rand.gen::<f64>()) / (image_width - 1) as f64;
-                        let v = (j as f64 + rand.gen::<f64>()) / (image_height - 1) as f64;
-                        ray_color(&camera.get_ray(u, v), &scene, max_depth, &mut rand)
-                    })
-                    .reduce(|accum, sample| accum + sample)
-                    .unwrap(),
-                samples,
-            );
-        }
-        println!("{}/{} scanlines completed.", image_height - j, image_height);
+    let handles = (0..thread_count)
+        .map(|_| {
+            let scene_ref = scene.clone();
+            let camera_ref = camera.clone();
+            let buffer_ref = buffer.clone();
+
+            thread::spawn(move || {
+                let thread_rand = rand::thread_rng();
+                let mut rand = XorShiftRng::from_rng(thread_rand).unwrap();
+
+                for _ in 0..samples_per_thread {
+                    for j in (0..image_height).rev() {
+                        for i in 0..image_width {
+                            let u = (i as f64 + rand.gen::<f64>()) / (image_width - 1) as f64;
+                            let v = (j as f64 + rand.gen::<f64>()) / (image_height - 1) as f64;
+                            let sample = ray_color(
+                                &camera_ref.get_ray(u, v),
+                                &scene_ref,
+                                max_depth,
+                                &mut rand,
+                            );
+
+                            let index = j * image_height + i;
+                            buffer_ref[index].r.store(
+                                buffer_ref[index].r.load(Ordering::Relaxed) + sample.r,
+                                Ordering::Relaxed,
+                            );
+                            buffer_ref[index].g.store(
+                                buffer_ref[index].g.load(Ordering::Relaxed) + sample.g,
+                                Ordering::Relaxed,
+                            );
+                            buffer_ref[index].b.store(
+                                buffer_ref[index].b.load(Ordering::Relaxed) + sample.b,
+                                Ordering::Relaxed,
+                            );
+                        }
+                    }
+                }
+            })
+        })
+        .collect::<Vec<_>>();
+
+    for handle in handles {
+        handle.join().unwrap();
     }
-
-    writer.flush();
 
     let elapsed = start.elapsed();
     println!("Done in {}ms", elapsed.as_millis());

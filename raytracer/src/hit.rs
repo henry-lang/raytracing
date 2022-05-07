@@ -27,6 +27,6 @@ pub struct HitData<'a> {
     pub material: &'a Material,
 }
 
-pub trait Hit {
+pub trait Hit: Send + Sync {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitData>;
 }
