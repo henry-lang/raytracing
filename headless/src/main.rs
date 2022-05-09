@@ -84,11 +84,11 @@ fn main() -> io::Result<()> {
     });
 
     let aspect_ratio = 16.0 / 9.0;
-    let thread_count = 16;
-    let samples_per_thread = 16;
+    let thread_count = num_cpus::get();
+    let samples_per_thread = 100;
     let max_depth = 50;
 
-    let image_width = 1920;
+    let image_width = 400;
     let image_height = (image_width as f64 / aspect_ratio) as usize;
 
     let buffer = Arc::new(
@@ -96,8 +96,6 @@ fn main() -> io::Result<()> {
             .map(|_| AtomicPixel::new(0.0, 0.0, 0.0))
             .collect::<Vec<_>>(),
     );
-
-    // TODO: move to individual threads
 
     let viewport_height = 2.0;
     let viewport_width = viewport_height * aspect_ratio;
@@ -110,6 +108,7 @@ fn main() -> io::Result<()> {
         focal_length,
     }));
 
+    println!("Running on {} threads", thread_count);
     let start = Instant::now();
 
     let handles = (0..thread_count)
@@ -134,7 +133,7 @@ fn main() -> io::Result<()> {
                                 &mut rand,
                             );
 
-                            let index = j * image_height + i;
+                            let index = (image_height - j - 1) * image_width + i;
                             buffer_ref[index].r.store(
                                 buffer_ref[index].r.load(Ordering::Relaxed) + sample.r,
                                 Ordering::Relaxed,
@@ -159,7 +158,24 @@ fn main() -> io::Result<()> {
     }
 
     let elapsed = start.elapsed();
-    println!("Done in {}ms", elapsed.as_millis());
+    println!("Image rendered in {}ms", elapsed.as_millis());
+
+    let start = Instant::now();
+
+    let mut writer = ImageWriter::new(File::create("image.ppm")?, image_width, image_height);
+    for pixel in buffer.as_ref() {
+        writer.write_pixel(
+            Color {
+                r: pixel.r.load(Ordering::Relaxed),
+                g: pixel.g.load(Ordering::Relaxed),
+                b: pixel.b.load(Ordering::Relaxed),
+            },
+            samples_per_thread * thread_count,
+        )
+    }
+
+    let elapsed = start.elapsed();
+    println!("Image written in {}ms", elapsed.as_millis());
 
     Ok(())
 }
