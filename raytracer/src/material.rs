@@ -4,10 +4,11 @@ use crate::color::Color;
 use crate::hit::HitData;
 use crate::ray::Ray;
 use crate::vector::Vector3;
+use crate::Number;
 
 pub enum Material {
     Lambertian { albedo: Color },
-    Metal { albedo: Color, fuzz: f64 },
+    Metal { albedo: Color, fuzz: Number },
 }
 
 pub enum ScatterResult {

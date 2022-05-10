@@ -1,6 +1,7 @@
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector::Vector3;
+use crate::Number;
 
 #[derive(Copy, Clone)]
 pub enum Face {
@@ -20,7 +21,7 @@ impl Face {
 
 #[derive(Copy, Clone)]
 pub struct HitData<'a> {
-    pub t: f64,
+    pub t: Number,
     pub normal: Vector3,
     pub point: Vector3,
     pub face: Face,
@@ -28,5 +29,5 @@ pub struct HitData<'a> {
 }
 
 pub trait Hit: Send + Sync {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitData>;
+    fn hit(&self, ray: &Ray, t_min: Number, t_max: Number) -> Option<HitData>;
 }

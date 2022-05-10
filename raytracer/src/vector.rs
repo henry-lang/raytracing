@@ -1,15 +1,18 @@
-use crate::color::{color, Color};
+use crate::{
+    color::{color, Color},
+    Number,
+};
 use rand::Rng;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 
 #[derive(Debug, Copy, Clone)]
 pub struct Vector3 {
-    pub x: f64,
-    pub y: f64,
-    pub z: f64,
+    pub x: Number,
+    pub y: Number,
+    pub z: Number,
 }
 
-pub fn vector3(x: f64, y: f64, z: f64) -> Vector3 {
+pub fn vector3(x: Number, y: Number, z: Number) -> Vector3 {
     Vector3 { x, y, z }
 }
 
@@ -48,15 +51,15 @@ impl Vector3 {
         self.x.abs() < tolerance && self.y.abs() < tolerance && self.z.abs() < tolerance
     }
 
-    pub fn dot(&self, other: &Self) -> f64 {
+    pub fn dot(&self, other: &Self) -> Number {
         self.x * other.x + self.y * other.y + self.z * other.z
     }
 
-    pub fn length_squared(&self) -> f64 {
+    pub fn length_squared(&self) -> Number {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
 
-    pub fn length(&self) -> f64 {
+    pub fn length(&self) -> Number {
         self.length_squared().sqrt()
     }
 
@@ -108,7 +111,7 @@ macro_rules! operator_impl {
         impl $tf for Vector3 {
             type Output = Self;
 
-            fn $fn(self, other: f64) -> Self::Output {
+            fn $fn(self, other: Number) -> Self::Output {
                 Self {
                     x: self.x $op other,
                     y: self.y $op other,
@@ -126,7 +129,7 @@ macro_rules! operator_impl {
         }
 
         impl $atf for Vector3 {
-            fn $afn(&mut self, other: f64) {
+            fn $afn(&mut self, other: Number) {
                 self.x $aop other;
                 self.y $aop other;
                 self.z $aop other;
@@ -136,8 +139,8 @@ macro_rules! operator_impl {
 }
 
 operator_impl!(
-    (Add, Add<f64>, add, +, AddAssign, AddAssign<f64>, add_assign, +=),
-    (Sub, Sub<f64>, sub, -, SubAssign, SubAssign<f64>, sub_assign, -=),
-    (Mul, Mul<f64>, mul, *, MulAssign, MulAssign<f64>, mul_assign, *=),
-    (Div, Div<f64>, div, /, DivAssign, DivAssign<f64>, div_assign, /=)
+    (Add, Add<Number>, add, +, AddAssign, AddAssign<Number>, add_assign, +=),
+    (Sub, Sub<Number>, sub, -, SubAssign, SubAssign<Number>, sub_assign, -=),
+    (Mul, Mul<Number>, mul, *, MulAssign, MulAssign<Number>, mul_assign, *=),
+    (Div, Div<Number>, div, /, DivAssign, DivAssign<Number>, div_assign, /=)
 );

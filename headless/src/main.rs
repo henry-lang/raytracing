@@ -28,7 +28,7 @@ fn ray_color(ray: &Ray, scene: &Scene, depth: usize, rand: &mut impl Rng) -> Col
         return color(0.0, 0.0, 0.0);
     }
 
-    if let Some(hit_data) = scene.hit(ray, 0.001, f64::INFINITY) {
+    if let Some(hit_data) = scene.hit(ray, 0.001, f32::INFINITY) {
         match hit_data.material.scatter(ray, &hit_data, rand) {
             ScatterResult::Absorbed => color(0.0, 0.0, 0.0),
             ScatterResult::Scattered {
@@ -89,7 +89,7 @@ fn main() -> io::Result<()> {
     let max_depth = 50;
 
     let image_width = 400;
-    let image_height = (image_width as f64 / aspect_ratio) as usize;
+    let image_height = (image_width as f32 / aspect_ratio) as usize;
 
     let buffer = Arc::new(
         (0..image_width * image_height)
@@ -124,8 +124,8 @@ fn main() -> io::Result<()> {
                 for _ in 0..samples_per_thread {
                     for j in (0..image_height).rev() {
                         for i in 0..image_width {
-                            let u = (i as f64 + rand.gen::<f64>()) / (image_width - 1) as f64;
-                            let v = (j as f64 + rand.gen::<f64>()) / (image_height - 1) as f64;
+                            let u = (i as f32 + rand.gen::<f32>()) / (image_width - 1) as f32;
+                            let v = (j as f32 + rand.gen::<f32>()) / (image_height - 1) as f32;
                             let sample = ray_color(
                                 &camera_ref.get_ray(u, v),
                                 &scene_ref,
@@ -175,7 +175,7 @@ fn main() -> io::Result<()> {
     }
 
     let elapsed = start.elapsed();
-    println!("Image written in {}ms", elapsed.as_millis());
+    println!("Image written to disk in {}ms", elapsed.as_millis());
 
     Ok(())
 }

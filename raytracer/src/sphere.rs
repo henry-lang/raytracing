@@ -2,15 +2,16 @@ use crate::hit::{Face, Hit, HitData};
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector::Vector3;
+use crate::Number;
 
 pub struct Sphere {
     pub center: Vector3,
-    pub radius: f64,
+    pub radius: Number,
     pub material: Material,
 }
 
 impl Hit for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitData> {
+    fn hit(&self, ray: &Ray, t_min: Number, t_max: Number) -> Option<HitData> {
         let distance = ray.origin - self.center;
         let a = ray.direction.length_squared();
         let b = ray.direction.dot(&distance);

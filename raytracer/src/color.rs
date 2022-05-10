@@ -1,13 +1,14 @@
+use crate::Number;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Sub, SubAssign};
 
 #[derive(Copy, Clone)]
 pub struct Color {
-    pub r: f64,
-    pub g: f64,
-    pub b: f64,
+    pub r: Number,
+    pub g: Number,
+    pub b: Number,
 }
 
-pub fn color(r: f64, g: f64, b: f64) -> Color {
+pub fn color(r: Number, g: Number, b: Number) -> Color {
     Color { r, g, b }
 }
 
@@ -28,7 +29,7 @@ macro_rules! operator_impl {
         impl $tf for Color {
             type Output = Self;
 
-            fn $fn(self, other: f64) -> Self::Output {
+            fn $fn(self, other: Number) -> Self::Output {
                 Self {
                     r: self.r $op other,
                     g: self.g $op other,
@@ -46,7 +47,7 @@ macro_rules! operator_impl {
         }
 
         impl $atf for Color {
-            fn $afn(&mut self, other: f64) {
+            fn $afn(&mut self, other: Number) {
                 self.r $aop other;
                 self.g $aop other;
                 self.b $aop other;
@@ -56,8 +57,8 @@ macro_rules! operator_impl {
 }
 
 operator_impl!(
-    (Add, Add<f64>, add, +, AddAssign, AddAssign<f64>, add_assign, +=),
-    (Sub, Sub<f64>, sub, -, SubAssign, SubAssign<f64>, sub_assign, -=),
-    (Mul, Mul<f64>, mul, *, MulAssign, MulAssign<f64>, mul_assign, *=),
-    (Div, Div<f64>, div, /, DivAssign, DivAssign<f64>, div_assign, /=)
+    (Add, Add<Number>, add, +, AddAssign, AddAssign<Number>, add_assign, +=),
+    (Sub, Sub<Number>, sub, -, SubAssign, SubAssign<Number>, sub_assign, -=),
+    (Mul, Mul<Number>, mul, *, MulAssign, MulAssign<Number>, mul_assign, *=),
+    (Div, Div<Number>, div, /, DivAssign, DivAssign<Number>, div_assign, /=)
 );

@@ -1,17 +1,17 @@
-use atomic_float::AtomicF64;
+use atomic_float::AtomicF32;
 
 pub struct AtomicPixel {
-    pub r: AtomicF64,
-    pub g: AtomicF64,
-    pub b: AtomicF64,
+    pub r: AtomicF32,
+    pub g: AtomicF32,
+    pub b: AtomicF32,
 }
 
 impl AtomicPixel {
-    pub fn new(r: f64, g: f64, b: f64) -> Self {
+    pub fn new(r: f32, g: f32, b: f32) -> Self {
         Self {
-            r: AtomicF64::new(r),
-            g: AtomicF64::new(g),
-            b: AtomicF64::new(b),
+            r: AtomicF32::new(r),
+            g: AtomicF32::new(g),
+            b: AtomicF32::new(b),
         }
     }
 }

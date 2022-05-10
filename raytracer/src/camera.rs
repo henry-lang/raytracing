@@ -1,11 +1,12 @@
 use crate::ray::Ray;
 use crate::vector::{vector3, Vector3};
+use crate::Number;
 
 pub struct CameraConfig {
     pub position: Vector3,
-    pub viewport_width: f64,
-    pub viewport_height: f64,
-    pub focal_length: f64,
+    pub viewport_width: Number,
+    pub viewport_height: Number,
+    pub focal_length: Number,
 }
 
 pub struct Camera {
@@ -32,7 +33,7 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f64, v: f64) -> Ray {
+    pub fn get_ray(&self, u: Number, v: Number) -> Ray {
         Ray {
             origin: self.position,
             direction: self.bottom_left + self.horizontal * u + self.vertical * v - self.position,

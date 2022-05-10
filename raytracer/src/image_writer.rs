@@ -2,6 +2,7 @@ use std::fs::File;
 use std::io::{BufWriter, Write};
 
 use crate::color::Color;
+use crate::Number;
 
 // Simple writer for the ppm image file format. I know it's terrible, but it's dead simple.
 
@@ -20,7 +21,7 @@ impl ImageWriter {
     }
 
     pub fn write_pixel(&mut self, mut color: Color, samples: usize) {
-        color *= 1.0 / samples as f64;
+        color *= 1.0 / samples as Number;
 
         let r = color.r.sqrt();
         let g = color.g.sqrt();

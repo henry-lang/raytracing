@@ -1,4 +1,5 @@
 use crate::vector::Vector3;
+use crate::Number;
 
 pub struct Ray {
     pub origin: Vector3,
@@ -6,7 +7,7 @@ pub struct Ray {
 }
 
 impl Ray {
-    pub fn at(&self, t: f64) -> Vector3 {
+    pub fn at(&self, t: Number) -> Vector3 {
         self.origin + self.direction * t
     }
 }
