@@ -5,7 +5,5 @@ edition = "2021"
 
 [dependencies]
 raytracer = {path = "../raytracer", features = ["f32"]}
-num_cpus = "1.13.1"
-atomic_float = "0.1.0"
 rand = "0.8.5"
 rand_xorshift = "0.3.0"

@@ -3,3 +3,6 @@ members = [
     "raytracer",
     "headless",
 ]
+
+[profile.release]
+lto = true

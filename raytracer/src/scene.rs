@@ -1,7 +1,10 @@
-use crate::color::Color;
+use crate::color::{color, Color};
 use crate::hit::{Hit, HitData};
+use crate::material::ScatterResult;
 use crate::ray::Ray;
 use crate::Number;
+
+use rand::Rng;
 
 pub struct Sky {
     pub top: Color,
@@ -32,5 +35,27 @@ impl Hit for Scene {
         }
 
         best
+    }
+}
+
+impl Scene {
+    pub fn ray_color(&self, ray: &Ray, depth: usize, rand: &mut impl Rng) -> Color {
+        if depth <= 0 {
+            return color(0.0, 0.0, 0.0);
+        }
+
+        if let Some(hit_data) = self.hit(ray, 0.001, f32::INFINITY) {
+            match hit_data.material.scatter(ray, &hit_data, rand) {
+                ScatterResult::Absorbed => color(0.0, 0.0, 0.0),
+                ScatterResult::Scattered {
+                    attenuation,
+                    scattered,
+                } => attenuation * self.ray_color(&scattered, depth - 1, rand),
+            }
+        } else {
+            let normalized = ray.direction.normalize();
+            let t = (normalized.y + 1.0) * 0.5;
+            self.sky.get_color(t)
+        }
     }
 }
