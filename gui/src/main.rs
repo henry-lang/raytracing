@@ -1,7 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use std::sync::Arc;
+
 use eframe::{
-    egui::{Button, CentralPanel, Context, ScrollArea, SidePanel},
+    egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, Visuals},
     epaint::Stroke,
     App, CreationContext, Frame,
 };
@@ -26,13 +28,11 @@ impl App for RaytracingGui {
 
                     let response = ui.add_sized(
                         (ui.available_width(), spacing),
-                        Button::new(format!("{}", self.scene.objects[row]))
-                            .small()
-                            .stroke(if selected {
-                                ctx.style().visuals.window_stroke()
-                            } else {
-                                Stroke::none()
-                            }),
+                        Button::new(self.scene.objects[row].name()).stroke(if selected {
+                            Stroke::new(2.0, ctx.style().visuals.hyperlink_color)
+                        } else {
+                            Stroke::none()
+                        }),
                     );
 
                     if response.clicked() {
@@ -80,6 +80,12 @@ fn main() {
     eframe::run_native(
         "raytracing gui",
         options,
-        Box::new(|_| Box::new(RaytracingGui::new())),
+        Box::new(|cc| {
+            cc.egui_ctx.set_visuals(match dark_light::detect() {
+                dark_light::Mode::Dark => Visuals::dark(),
+                dark_light::Mode::Light => Visuals::light(),
+            });
+            Box::new(RaytracingGui::new())
+        }),
     );
 }

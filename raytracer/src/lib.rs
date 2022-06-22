@@ -18,6 +18,9 @@ pub use scene::*;
 pub use sphere::*;
 pub use vector::*;
 
+#[cfg(all(feature = "f32", feature = "f64"))]
+compile_error!("f32 and f64 are mutually exclusive");
+
 #[cfg(all(feature = "f32", not(feature = "f64")))]
 pub type Number = f32;
 

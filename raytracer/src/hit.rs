@@ -30,6 +30,7 @@ pub struct HitData<'a> {
     pub material: &'a Material,
 }
 
-pub trait Hit: Display {
+pub trait Hit {
     fn hit(&self, ray: &Ray, t_min: Number, t_max: Number) -> Option<HitData>;
+    fn name(&self) -> &'static str;
 }

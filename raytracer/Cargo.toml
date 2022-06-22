@@ -9,5 +9,6 @@ edition = "2021"
 rand = "0.8.5"
 
 [features]
+default = ["f32"]
 f64 = []
 f32 = []

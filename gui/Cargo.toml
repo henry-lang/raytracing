@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dark-light = "0.2.2"
 eframe = { git = "https://github.com/emilk/egui.git", rev = "dc26890a8044a02784980311811399778011c3b9" }
 raytracer = {path = "../raytracer", features = ["f32"]}
 rand = "0.8.5"

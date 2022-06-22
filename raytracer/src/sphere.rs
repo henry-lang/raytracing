@@ -49,10 +49,8 @@ impl Hit for Sphere {
             material: &self.material,
         })
     }
-}
 
-impl Display for Sphere {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Sphere")
+    fn name(&self) -> &'static str {
+        "Sphere"
     }
 }

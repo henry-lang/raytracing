@@ -38,11 +38,9 @@ impl Hit for Scene {
 
         best
     }
-}
 
-impl Display for Scene {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Scene")
+    fn name(&self) -> &'static str {
+        "Scene"
     }
 }
 
