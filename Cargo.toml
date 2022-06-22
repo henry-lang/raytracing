@@ -2,6 +2,7 @@
 members = [
     "raytracer",
     "headless",
+    "gui"
 ]
 
 [profile.release]

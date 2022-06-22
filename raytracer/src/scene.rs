@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::color::{color, Color};
 use crate::hit::{Hit, HitData};
 use crate::material::ScatterResult;
@@ -35,6 +37,12 @@ impl Hit for Scene {
         }
 
         best
+    }
+}
+
+impl Display for Scene {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Scene")
     }
 }
 

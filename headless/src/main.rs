@@ -6,14 +6,7 @@ use rand::{Rng, SeedableRng};
 use rand_xorshift::XorShiftRng;
 
 use raytracer::{
-    camera::{Camera, CameraConfig},
-    color::color,
-    image_writer::ImageWriter,
-    material::Material,
-    scene::{Scene, Sky},
-    sphere::Sphere,
-    vector::vector3,
-    Number,
+    color, vector3, Camera, CameraConfig, ImageWriter, Material, Number, Scene, Sky, Sphere,
 };
 
 fn main() -> io::Result<()> {
@@ -57,7 +50,7 @@ fn main() -> io::Result<()> {
     };
 
     let aspect_ratio = 16.0 / 9.0;
-    let samples = 20;
+    let samples = 500;
     let max_depth = 5;
 
     let image_width = 400;

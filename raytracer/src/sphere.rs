@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::hit::{Face, Hit, HitData};
 use crate::material::Material;
 use crate::ray::Ray;
@@ -46,5 +48,11 @@ impl Hit for Sphere {
             face,
             material: &self.material,
         })
+    }
+}
+
+impl Display for Sphere {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Sphere")
     }
 }

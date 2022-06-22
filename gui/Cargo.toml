@@ -1,0 +1,12 @@
+[package]
+name = "gui"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+eframe = { git = "https://github.com/emilk/egui.git", rev = "dc26890a8044a02784980311811399778011c3b9" }
+raytracer = {path = "../raytracer", features = ["f32"]}
+rand = "0.8.5"
+rand_xorshift = "0.3.0"

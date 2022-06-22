@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::material::Material;
 use crate::ray::Ray;
 use crate::vector::Vector3;
@@ -28,6 +30,6 @@ pub struct HitData<'a> {
     pub material: &'a Material,
 }
 
-pub trait Hit: Send + Sync {
+pub trait Hit: Display {
     fn hit(&self, ray: &Ray, t_min: Number, t_max: Number) -> Option<HitData>;
 }
