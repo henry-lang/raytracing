@@ -4,13 +4,13 @@ use std::sync::Arc;
 
 use eframe::{
     egui::{Button, CentralPanel, Context, ScrollArea, SidePanel, Visuals},
-    epaint::Stroke,
+    epaint::{mutex::RwLock, Stroke},
     App, CreationContext, Frame,
 };
 use raytracer::{color, vector3, Material, Scene, Sky, Sphere};
 
 struct RaytracingGui {
-    scene: Scene,
+    scene: Arc<RwLock<Scene>>,
     selected: Option<usize>,
 }
 
@@ -22,33 +22,47 @@ impl App for RaytracingGui {
             ui.separator();
 
             let spacing = ui.spacing().interact_size.y;
-            ScrollArea::vertical().show_rows(ui, spacing, self.scene.objects.len(), |ui, rows| {
-                for row in rows {
-                    let selected = self.selected.is_some() && self.selected.unwrap() == row;
+            ScrollArea::vertical().show_rows(
+                ui,
+                spacing,
+                self.scene.read().objects.len(),
+                |ui, rows| {
+                    for row in rows {
+                        let selected = self.selected.is_some() && self.selected.unwrap() == row;
 
-                    let response = ui.add_sized(
-                        (ui.available_width(), spacing),
-                        Button::new(self.scene.objects[row].name()).stroke(if selected {
-                            Stroke::new(2.0, ctx.style().visuals.hyperlink_color)
-                        } else {
-                            Stroke::none()
-                        }),
-                    );
+                        let response = ui.add_sized(
+                            (ui.available_width(), spacing),
+                            Button::new(self.scene.read().objects[row].name()).stroke(
+                                if selected {
+                                    Stroke::new(2.0, ctx.style().visuals.hyperlink_color)
+                                } else {
+                                    Stroke::none()
+                                },
+                            ),
+                        );
 
-                    if response.clicked() {
-                        self.selected = Some(row)
+                        if response.clicked() {
+                            self.selected = Some(row)
+                        }
                     }
-                }
-            });
+                },
+            );
         });
+
+        if let Some(idx) = self.selected {
+            SidePanel::right("inspector").show(ctx, |ui| {
+                ui.heading("Inspector");
+                ui.separator();
+            });
+        }
     }
 }
 
 impl RaytracingGui {
     fn new() -> Self {
         Self {
-            selected: Some(0),
-            scene: Scene {
+            selected: None,
+            scene: Arc::new(RwLock::new(Scene {
                 sky: Sky {
                     top: color(0.5, 0.7, 1.0),
                     bottom: color(1.0, 1.0, 1.0),
@@ -69,7 +83,7 @@ impl RaytracingGui {
                         },
                     }),
                 ],
-            },
+            })),
         }
     }
 }
